@@ -1,0 +1,5 @@
+.npm
+.next
+node_modules
+dist
+src/components/ui
