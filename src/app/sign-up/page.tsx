@@ -1,9 +1,9 @@
-import Login from '@/components/auth/Login';
+import SignUp from '@/components/auth/SignUp';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
-export default async function LoginPage() {
+export default async function SignUpPage() {
   const supabase = createServerComponentClient({ cookies });
   const { data } = await supabase.auth.getSession();
 
@@ -13,7 +13,7 @@ export default async function LoginPage() {
 
   return (
     <>
-      <Login />
+      <SignUp />
     </>
   );
 }

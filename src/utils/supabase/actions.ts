@@ -38,8 +38,17 @@ export async function signup(formData: FormData) {
   const { error } = await supabase.auth.signUp(data);
 
   if (error) {
-    redirect('/error');
+    return redirect('/error');
   }
+
+  revalidatePath('/', 'layout');
+  redirect('/');
+}
+
+export async function logout() {
+  const supabase = createClient();
+
+  await supabase.auth.signOut();
 
   revalidatePath('/', 'layout');
   redirect('/');
