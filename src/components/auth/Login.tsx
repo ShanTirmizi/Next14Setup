@@ -10,77 +10,54 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { login } from '@/utils/supabase/actions';
+import { signInWithEmailAndPassword } from '@/utils/supabase/actions';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-
-// import { login, signup } from './actions';
 
 const loginFormSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
-  // formAction: z.string(),
 });
 
 type TLoginForm = z.infer<typeof loginFormSchema>;
 
 export default function Login() {
-  const supabase = createClientComponentClient();
+  const router = useRouter();
   const form = useForm({
     resolver: zodResolver(loginFormSchema),
     defaultValues: {
       email: '',
       password: '',
-      // formAction: 'login',
     },
   });
 
   const {
-    formState: { isSubmitting },
+    formState: { isSubmitting, errors },
     handleSubmit,
-    register,
     setError,
   } = form;
 
-  // async function login(formData: TLoginForm) {
-  //   // type-casting here for convenience
-  //   // in practice, you should validate your inputs
-  //   console.log('formData', formData);
-  //   const data = {
-  //     email: formData.email,
-  //     password: formData.password,
-  //   };
-  //   const { error } = await supabase.auth.signInWithPassword(data);
+  async function onSubmit(data: TLoginForm) {
+    const result = await signInWithEmailAndPassword(data);
 
-  //   if (error) {
-  //     return setError(error?.message, { shouldFocus: true });
-  //   }
-  //   revalidatePath('/', 'layout');
-  //   redirect('/');
-  // }
+    const { error } = await JSON.parse(result);
 
-  // const onSubmit = async (data: TLoginForm) => {
-  //   try {
-  //     const formData = new FormData();
-  //     formData.append('email', data.email);
-  //     formData.append('password', data.password);
-  //     if (data.formAction === 'login') {
-  //       await login(formData);
-  //     } else if (data.formAction === 'signup') {
-  //       await signup(formData);
-  //     }
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
+    if (error) {
+      return setError('root', { message: error.message });
+    }
+
+    router.push('/');
+    window.location.reload();
+  }
 
   return (
     <>
       <Form {...form}>
-        <form className="space-y-8">
+        <form className="space-y-8" onSubmit={handleSubmit(onSubmit)}>
           <FormField
             control={form.control}
             name="email"
@@ -92,12 +69,14 @@ export default function Login() {
                     placeholder="Enter your email"
                     {...field}
                     type="email"
+                    disabled={isSubmitting}
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+          {errors.email && <p>{errors.email.message}</p>}
           <FormField
             control={form.control}
             name="password"
@@ -109,13 +88,18 @@ export default function Login() {
                     placeholder="Enter your password"
                     {...field}
                     type="password"
+                    disabled={isSubmitting}
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <Button formAction={login}>Login</Button>
+          {errors.password && <p>{errors.password.message}</p>}
+          <Button type="submit" disabled={isSubmitting} className="gap-x-2">
+            Login {isSubmitting && <Loader2 className="animate-spin ml-auto" />}
+          </Button>
+          {errors.root && <p>{errors.root.message}</p>}
         </form>
       </Form>
       <Link href="/sign-up" className="link w-full">

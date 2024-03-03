@@ -10,12 +10,10 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-// import { signup } from '@/utils/supabase/actions';
+import { signUpWithEmailAndPassword } from '@/utils/supabase/actions';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -36,9 +34,7 @@ const signUpFormSchema = z
 type TSignUpForm = z.infer<typeof signUpFormSchema>;
 
 export default function SignUp() {
-  const router = useRouter();
   const [message, setMessage] = useState('');
-  const supabase = createClientComponentClient();
 
   const form = useForm({
     resolver: zodResolver(signUpFormSchema),
@@ -53,41 +49,22 @@ export default function SignUp() {
     handleSubmit,
     formState: { errors, isSubmitting },
     setValue,
+    setError,
   } = form;
-  // const onSubmit = async (data: TSignUpForm) => {
-  //   try {
-  //     const formData = new FormData();
-  //     formData.append('email', data.email);
-  //     formData.append('password', data.password);
-  //     const res = await signup(formData);
-  //     console.log('res', res);
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
 
-  async function onSubmit(formData: TSignUpForm) {
-    const data = {
-      email: formData.email,
-      password: formData.password,
-    };
-
-    const { error } = await supabase.auth.signUp(data);
-    console.log('error', error);
+  async function onSubmit(data: TSignUpForm) {
+    const result = await signUpWithEmailAndPassword(data);
+    const { error } = await JSON.parse(result);
     if (error) {
-      return router.push('/error');
+      return setError('root', { message: error.message });
     }
 
     setValue('email', '');
     setValue('password', '');
     setValue('confirmPassword', '');
 
-    // revalidatePath('/', 'layout');
-
     setMessage('Success! Please check your email for further instructions.');
   }
-
-  // console.log('errors', errors);
 
   return (
     <>
@@ -151,13 +128,16 @@ export default function SignUp() {
             )}
           />
           {errors.confirmPassword && <p>{errors.confirmPassword.message}</p>}
-          <Button type="submit">Sign up</Button>
+          <Button type="submit" disabled={isSubmitting}>
+            Sign up{' '}
+            {isSubmitting && <Loader2 className="animate-spin ml-auto" />}
+          </Button>
+          {errors.root && <p>{errors?.root.message}</p>}
         </form>
       </Form>
       <Link href="/login" className="link w-full">
         Already have an account? Sign In.
       </Link>
-      {isSubmitting && <Loader2 />}
       {message && <p>{message}</p>}
     </>
   );

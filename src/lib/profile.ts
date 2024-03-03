@@ -1,9 +1,8 @@
 import { prisma } from '@/lib/prisma';
-import { createClient } from '@/utils/supabase/server';
-import { redirect } from 'next/navigation';
+import { createSupabaseServerClient } from '@/utils/supabase/server';
 
 export const Profile = async () => {
-  const supabase = createClient();
+  const supabase = await createSupabaseServerClient();
   const { data } = await supabase.auth.getUser();
 
   const { user } = data;

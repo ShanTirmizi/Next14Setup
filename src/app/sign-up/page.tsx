@@ -1,13 +1,12 @@
 import SignUp from '@/components/auth/SignUp';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createSupabaseServerClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 
 export default async function SignUpPage() {
-  const supabase = createServerComponentClient({ cookies });
-  const { data } = await supabase.auth.getSession();
+  const supabase = await createSupabaseServerClient();
+  const { data } = await supabase.auth.getUser();
 
-  if (data?.session) {
+  if (data?.user) {
     redirect('/');
   }
 
