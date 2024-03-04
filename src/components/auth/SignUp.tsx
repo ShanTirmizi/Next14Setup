@@ -56,7 +56,9 @@ export default function SignUp() {
     const result = await signUpWithEmailAndPassword(data);
     const { error } = await JSON.parse(result);
     if (error) {
-      return setError('root', { message: error.message });
+      setError('root', { message: error.message });
+      setMessage('');
+      return;
     }
 
     setValue('email', '');
@@ -67,7 +69,7 @@ export default function SignUp() {
   }
 
   return (
-    <>
+    <div className="max-w-[350px] space-y-6 w-full mx-2">
       <Form {...form}>
         <form className="space-y-8" onSubmit={handleSubmit(onSubmit)}>
           <FormField
@@ -88,8 +90,6 @@ export default function SignUp() {
               </FormItem>
             )}
           />
-          {errors.email && <p>{errors.email.message}</p>}
-
           <FormField
             control={form.control}
             name="password"
@@ -108,7 +108,6 @@ export default function SignUp() {
               </FormItem>
             )}
           />
-          {errors.password && <p>{errors.password.message}</p>}
           <FormField
             control={form.control}
             name="confirmPassword"
@@ -127,18 +126,36 @@ export default function SignUp() {
               </FormItem>
             )}
           />
-          {errors.confirmPassword && <p>{errors.confirmPassword.message}</p>}
-          <Button type="submit" disabled={isSubmitting}>
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full gap-x-2"
+          >
             Sign up{' '}
-            {isSubmitting && <Loader2 className="animate-spin ml-auto" />}
+            {isSubmitting && (
+              <span>
+                <Loader2 className="animate-spin ml-auto" />
+              </span>
+            )}
           </Button>
-          {errors.root && <p>{errors?.root.message}</p>}
+          {errors.root && (
+            <div className="p-4 rounded-md border border-gray-200 dark:border-gray-800 bg-red-50 dark:bg-red-900">
+              {errors.root.message}
+            </div>
+          )}
         </form>
       </Form>
-      <Link href="/login" className="link w-full">
-        Already have an account? Sign In.
-      </Link>
-      {message && <p>{message}</p>}
-    </>
+      <div className="text-center text-sm mt-4">
+        Already have an account?{' '}
+        <Link className="underline" href="/login">
+          Sign In
+        </Link>
+      </div>
+      {message && (
+        <div className="p-4 rounded-md border border-gray-200 dark:border-gray-800 bg-green-50 dark:bg-green-900">
+          {message}
+        </div>
+      )}
+    </div>
   );
 }

@@ -55,7 +55,7 @@ export default function Login() {
   }
 
   return (
-    <>
+    <div className="max-w-[350px] space-y-6 w-full">
       <Form {...form}>
         <form className="space-y-8" onSubmit={handleSubmit(onSubmit)}>
           <FormField
@@ -76,7 +76,6 @@ export default function Login() {
               </FormItem>
             )}
           />
-          {errors.email && <p>{errors.email.message}</p>}
           <FormField
             control={form.control}
             name="password"
@@ -95,16 +94,31 @@ export default function Login() {
               </FormItem>
             )}
           />
-          {errors.password && <p>{errors.password.message}</p>}
-          <Button type="submit" disabled={isSubmitting} className="gap-x-2">
-            Login {isSubmitting && <Loader2 className="animate-spin ml-auto" />}
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="gap-x-2 w-full"
+          >
+            Login{' '}
+            {isSubmitting && (
+              <span>
+                <Loader2 className="animate-spin ml-auto" />
+              </span>
+            )}
           </Button>
-          {errors.root && <p>{errors.root.message}</p>}
+          {errors.root && (
+            <div className="p-4 rounded-md border border-gray-200 dark:border-gray-800 bg-red-50 dark:bg-red-900">
+              {errors.root.message}
+            </div>
+          )}
         </form>
       </Form>
-      <Link href="/sign-up" className="link w-full">
-        Don&apos;t have an account? Sign Up.
-      </Link>
-    </>
+      <div className="text-center text-sm mt-4">
+        Don&apos;t have an account?{' '}
+        <Link className="underline" href="/sign-up">
+          Sign Up
+        </Link>
+      </div>
+    </div>
   );
 }
