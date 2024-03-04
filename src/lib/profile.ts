@@ -11,8 +11,6 @@ export const Profile = async () => {
     return null;
   }
 
-  console.log('user', user);
-
   const profile = await prisma.user.findUnique({
     where: {
       id: user.id,
