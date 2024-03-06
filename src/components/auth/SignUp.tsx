@@ -69,7 +69,7 @@ export default function SignUp() {
   }
 
   return (
-    <div className="max-w-[350px] space-y-6 w-full mx-2">
+    <div className="space-y-6 w-full">
       <Form {...form}>
         <form className="space-y-8" onSubmit={handleSubmit(onSubmit)}>
           <FormField
@@ -148,7 +148,7 @@ export default function SignUp() {
       <div className="text-center text-sm mt-4">
         Already have an account?{' '}
         <Link className="underline" href="/login">
-          Sign In
+          Login
         </Link>
       </div>
       {message && (

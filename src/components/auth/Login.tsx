@@ -55,7 +55,7 @@ export default function Login() {
   }
 
   return (
-    <div className="max-w-[350px] space-y-6 w-full">
+    <div className="space-y-6 w-full">
       <Form {...form}>
         <form className="space-y-8" onSubmit={handleSubmit(onSubmit)}>
           <FormField
