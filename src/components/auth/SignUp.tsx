@@ -53,6 +53,7 @@ export default function SignUp() {
   } = form;
 
   async function onSubmit(data: TSignUpForm) {
+    setMessage('');
     const result = await signUpWithEmailAndPassword(data);
     const { error } = await JSON.parse(result);
     if (error) {

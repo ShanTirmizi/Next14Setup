@@ -10,72 +10,60 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { signInWithEmailAndPassword } from '@/utils/supabase/actions';
+import { resetPassword } from '@/utils/supabase/actions';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-const loginFormSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
-});
+const signUpFormSchema = z
+  .object({
+    password: z.string().min(8),
+    confirmPassword: z.string().min(8),
+  })
+  .refine(
+    (values) => {
+      return values.password === values.confirmPassword;
+    },
+    { message: 'Passwords do not match', path: ['confirmPassword'] },
+  );
 
-type TLoginForm = z.infer<typeof loginFormSchema>;
+type TSignUpForm = z.infer<typeof signUpFormSchema>;
 
-export default function Login() {
+export default function ResetPasswordForm() {
   const router = useRouter();
   const form = useForm({
-    resolver: zodResolver(loginFormSchema),
+    resolver: zodResolver(signUpFormSchema),
     defaultValues: {
-      email: '',
       password: '',
+      confirmPassword: '',
     },
   });
 
   const {
-    formState: { isSubmitting, errors },
     handleSubmit,
+    formState: { errors, isSubmitting },
+    setValue,
     setError,
   } = form;
 
-  async function onSubmit(data: TLoginForm) {
-    const result = await signInWithEmailAndPassword(data);
-
+  async function onSubmit(data: TSignUpForm) {
+    const result = await resetPassword(data);
     const { error } = await JSON.parse(result);
-
     if (error) {
-      return setError('root', { message: error.message });
+      setError('root', { message: error.message });
+      return;
     }
 
-    router.push('/');
-    window.location.reload();
+    setValue('password', '');
+    setValue('confirmPassword', '');
   }
 
   return (
     <div className="space-y-6 w-full">
       <Form {...form}>
         <form className="space-y-8" onSubmit={handleSubmit(onSubmit)}>
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Enter your email"
-                    {...field}
-                    type="email"
-                    disabled={isSubmitting}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
           <FormField
             control={form.control}
             name="password"
@@ -94,18 +82,30 @@ export default function Login() {
               </FormItem>
             )}
           />
-          {/* forgot password link */}
-          <div className="text-right">
-            <Link href="/forgot-password" className="underline">
-              Forgot password?
-            </Link>
-          </div>
+          <FormField
+            control={form.control}
+            name="confirmPassword"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Confirm Password</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Confirm your password"
+                    {...field}
+                    type="password"
+                    disabled={isSubmitting}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="gap-x-2 w-full"
+            className="w-full gap-x-2"
           >
-            Login{' '}
+            Update{' '}
             {isSubmitting && (
               <span>
                 <Loader2 className="animate-spin ml-auto" />
@@ -119,12 +119,6 @@ export default function Login() {
           )}
         </form>
       </Form>
-      <div className="text-center text-sm mt-4">
-        Don&apos;t have an account?{' '}
-        <Link className="underline" href="/sign-up">
-          Sign Up
-        </Link>
-      </div>
     </div>
   );
 }
