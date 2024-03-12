@@ -10,28 +10,25 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { signInWithEmailAndPassword } from '@/utils/supabase/actions';
+import { forgotPassword } from '@/utils/supabase/actions';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 const loginFormSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(8),
 });
 
 type TLoginForm = z.infer<typeof loginFormSchema>;
 
-export default function Login() {
-  const router = useRouter();
+export default function ForgotPasswordForms() {
+  const [message, setMessage] = useState('');
   const form = useForm({
     resolver: zodResolver(loginFormSchema),
     defaultValues: {
       email: '',
-      password: '',
     },
   });
 
@@ -39,10 +36,12 @@ export default function Login() {
     formState: { isSubmitting, errors },
     handleSubmit,
     setError,
+    setValue,
   } = form;
 
   async function onSubmit(data: TLoginForm) {
-    const result = await signInWithEmailAndPassword(data);
+    setMessage('');
+    const result = await forgotPassword(data?.email);
 
     const { error } = await JSON.parse(result);
 
@@ -50,8 +49,8 @@ export default function Login() {
       return setError('root', { message: error.message });
     }
 
-    router.push('/');
-    window.location.reload();
+    setMessage('Check your email for a password reset link');
+    setValue('email', '');
   }
 
   return (
@@ -76,36 +75,12 @@ export default function Login() {
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Password</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Enter your password"
-                    {...field}
-                    type="password"
-                    disabled={isSubmitting}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {/* forgot password link */}
-          <div className="text-right">
-            <Link href="/forgot-password" className="underline">
-              Forgot password?
-            </Link>
-          </div>
           <Button
             type="submit"
             disabled={isSubmitting}
             className="gap-x-2 w-full"
           >
-            Login{' '}
+            Send{' '}
             {isSubmitting && (
               <span>
                 <Loader2 className="animate-spin ml-auto" />
@@ -119,12 +94,11 @@ export default function Login() {
           )}
         </form>
       </Form>
-      <div className="text-center text-sm mt-4">
-        Don&apos;t have an account?{' '}
-        <Link className="underline" href="/sign-up">
-          Sign Up
-        </Link>
-      </div>
+      {message && (
+        <div className="p-4 rounded-md border border-gray-200 dark:border-gray-800 bg-green-50 dark:bg-green-900">
+          {message}
+        </div>
+      )}
     </div>
   );
 }
