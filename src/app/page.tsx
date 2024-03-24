@@ -46,7 +46,6 @@ export default async function Home() {
           </Button>
         </div>
       )}
-
       <Button className="m-auto">Click me</Button>
     </main>
   );
